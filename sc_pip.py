@@ -4,7 +4,7 @@ import glob
 import os
 import click
 import subprocess
-from add_log import add_log
+from utils.add_log import add_log
 import json
 from rich.console import Console
 from rich.markdown import Markdown
@@ -20,7 +20,6 @@ def find_analysis_method(name):
     if not os.path.exists(f"{sc_dir}/ana_module/{name}"):
         raise FileNotFoundError()
     else:
-        print(f"{sc_dir}/ana_module/{name}")
         return f"{sc_dir}/ana_module/{name}"
 
 def load_env(env_p, soft = 'singularity', sub_cmd = 'exec --nv'):
@@ -96,7 +95,6 @@ class ModuleRunner:
             self.cmd = ' '.join([self.exec, self.start_sc, self.args_str])
         else:
             self.cmd = ' '.join([self.runner_env, self.start_sc, self.args_str])
-        print(self.cmd)
     
     @add_log
     def run_cmd(self):

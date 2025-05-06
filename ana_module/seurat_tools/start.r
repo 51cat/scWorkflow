@@ -146,7 +146,7 @@ if (argv$do == 'recluster') {
 
 if (argv$do == 'downsample') {
   
-  rds <- downsample.seurat(rds,p = argv$prop, g = argv$group_col)
+  rds <- downsample.seurat(rds,p = argv$prop, g = argv$group_by)
 
   saveRDS(rds, "./out_downsample.rds")
 }
