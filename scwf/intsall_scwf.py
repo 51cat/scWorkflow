@@ -21,9 +21,9 @@ def module():
 def download_env(method):
     if method == 'oss':
         #cmd1 = f'obsutil cp obs://{Bucket_name}/lib.tar.gz ./'
-        cmd2 = f'tar -zxvf ./lib.tar.gz'
-        cmd3 = f'cp -a ./lib {ROOT_DIR}/'
-        cmd4 = f'rm -rf ./lib/ ./lib.tar.gz'
+        cmd2 = f'tar -zxvf ./libs.tar.gz'
+        cmd3 = f'cp -a ./libs {ROOT_DIR}/'
+        cmd4 = f'rm -rf ./lib/ ./libs.tar.gz'
 
         #subprocess.check_call(cmd1, shell=True)
         subprocess.check_call(cmd2, shell=True)
