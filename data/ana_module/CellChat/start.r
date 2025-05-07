@@ -44,6 +44,12 @@ mk.outdir <- function(dir) {
 mk_input <- function(seurat.rds.path, group_col, celltype_col, control, treatment) {
   
   obj <- readRDS(seurat.rds.path)
+
+  if (!is.factor(obj@meta.data[[celltype_col]])) {
+    print('将细胞类型列转换为因子...')
+    obj@meta.data[[celltype_col]]<- as_factor(obj@meta.data[[celltype_col]])
+  }
+
   Idents(obj) <- obj@meta.data[[celltype_col]]
   if (control != 'None' & treatment != 'None') {
     cells <- rownames(obj@meta.data[obj@meta.data[[group_col]] %in% c(control, treatment), ])
@@ -83,7 +89,7 @@ mk_input <- function(seurat.rds.path, group_col, celltype_col, control, treatmen
     table(x@meta.data[[group_col]], x@meta.data[[celltype_col]])
   }))
   
-  return(seurat_list_filtered)
+  return(list(obj = seurat_list_filtered, common_cell = common_celltypes))
 }
 
 process_data <- function(objlist, celltype_col, spec = 'human') {
@@ -463,6 +469,7 @@ show.pathway <- function(cellchat_input, outdir, celltype_col, group_col, cell_c
     
     filter.cellchatlist <- get_pathway_cellchatlist(pathway.union[inx], cellchatlist)
     
+    
     weight.max <- getMaxWeight(filter.cellchatlist, slot.name = c("netP"), attribute = pathway.union[inx])
     print(pathway.union[inx])
     print(weight.max[1])
@@ -509,9 +516,9 @@ show.pathway <- function(cellchat_input, outdir, celltype_col, group_col, cell_c
     #cellchat@meta[[group_col]] = factor(cellchat@meta[[group_col]], levels = levels)
     
     #p <- plotGeneExpression(cellchat, signaling = pathway.union[inx], split.by = group_col) 
-    genes <- extractEnrichedLR(cellchat_obj, signaling = pathway.union[inx], geneLR.return = TRUE, enriched.only = TRUE)$geneLR
-    genes.df <- tibble(gene = genes, pathway =  pathway.union[inx])
-    genes.df %>% write_csv(str_glue("{out.p}/{pathway.union[inx]}_gene.csv"))
+    #genes <- extractEnrichedLR(cellchat_obj, signaling = pathway.union[inx], geneLR.return = TRUE, enriched.only = FALSE)$geneLR
+    #genes.df <- tibble(gene = genes, pathway =  pathway.union[inx])
+    #genes.df %>% write_csv(str_glue("{out.p}/{pathway.union[inx]}_gene.csv"))
     #sufx <- stringr::str_c(levels, collapse = "_")
     #save_gg(p, str_glue("{out.p}/{pathway.union[inx]}_violin_gene_{sufx}"),ncell*0.8, length(genes)*1.1)
   }
@@ -545,7 +552,12 @@ parse_comparisons <- function(input_str) {
   return(parsed_list)
 }
 
-
+filter_color <- function(cpal, target) {
+  cpal <- cpal[names(cpal) %in% target]
+  print(cpal)
+  return(cpal)
+}
+ 
 
 parser <- ArgumentParser(description = "")
 
@@ -637,11 +649,18 @@ if (compare_method == 'pairs') {
         control=control, 
         treatment=treatment)
       
+      cellchat_input_obj <- cellchat_input[['obj']]
+      common_cell <- cellchat_input[['common_cell']]
+      cell_cpal2 <- filter_color(cell_cpal, common_cell)
+
+
       cellchat_obj <- process_data(
-        cellchat_input,  
+        cellchat_input_obj,  
         celltype_col=celltype_col,  
         spec = spec )
       cellchat_obj[['run_mode']] <- 'two_sample'
+      cellchat_obj[['cell_cpal']] <- cell_cpal2
+      cellchat_obj[['group_cpal']] <- group_cpal
       
       saveRDS(cellchat_obj, str_glue("{res.out}/{treatment}_vs_{control}.rds"))
       # 保存表
@@ -650,21 +669,26 @@ if (compare_method == 'pairs') {
       }
     }else {
       cellchat_obj <- readRDS(str_glue("{cellchat_rds_dir}/{treatment}_vs_{control}.rds"))
+      cell_cpal2 <- cellchat_obj[['cell_cpal']] 
+      group_cpal <- cellchat_obj[['group_cpal']]
+
       print("LOAD : CELLCHAT RDS FINISH!")
     }
+
+
     
     
     # analysis
     show.Similarity(cellchat_obj, str_glue("{outdir.comp}"), treatment = treatment, control = control)
-    show.compareInteractions(cellchat_obj,  str_glue("{outdir.comp}"), treatment = treatment, control = control, celltype_col= celltype_col, group_cpal = group_cpal, cell_cpal = cell_cpal)
-    show.eachsample_interaction(cellchat_obj, str_glue("{outdir.comp}"), celltype_col = celltype_col, cell_cpal = cell_cpal)
-    show.netanalysis(cellchat_obj,str_glue("{outdir.comp}"),cell_cpal = cell_cpal)
+    show.compareInteractions(cellchat_obj,  str_glue("{outdir.comp}"), treatment = treatment, control = control, celltype_col= celltype_col, group_cpal = group_cpal, cell_cpal = cell_cpal2)
+    show.eachsample_interaction(cellchat_obj, str_glue("{outdir.comp}"), celltype_col = celltype_col, cell_cpal = cell_cpal2)
+    show.netanalysis(cellchat_obj,str_glue("{outdir.comp}"),cell_cpal = cell_cpal2)
     show.ranknet(cellchat_obj, str_glue("{outdir.comp}"), group_cpal = group_cpal)
     
-    show.incoming_outcoming(cellchat_obj, str_glue("{outdir.comp}"), celltype_col = celltype_col, cell_cpal = cell_cpal)
+    show.incoming_outcoming(cellchat_obj, str_glue("{outdir.comp}"), celltype_col = celltype_col, cell_cpal = cell_cpal2)
     show.pathwayGene_bubble(cellchat_obj, str_glue("{outdir.comp}"), celltype_col = celltype_col)
     show.diffpathway(cellchat_obj, str_glue("{outdir.comp}"), treatment=treatment,  control=control, celltype_col=celltype_col, thresh.pc=0.1, thresh.fc = 0.1, thresh.p = 0.05)
-    show.pathway(cellchat_obj, str_glue("{outdir.comp}"),celltype_col = celltype_col, group_col = group_col, cell_cpal = cell_cpal)
+    show.pathway(cellchat_obj, str_glue("{outdir.comp}"),celltype_col = celltype_col, group_col = group_col, cell_cpal = cell_cpal2)
     print('Finish!')
   }
 }
@@ -682,8 +706,15 @@ if (compare_method == 'multi') {
   if (cellchat_rds_dir == 'None') {
     
     cellchat_input <- mk_input(seurat.rds.path, group_col = group_col, celltype_col=celltype_col, control='None', treatment='None')
-    cellchat_obj <- process_data(cellchat_input,  celltype_col=celltype_col)
+
+    cellchat_input_obj <- cellchat_input[['obj']]
+    common_cell <- cellchat_input[['common_cell']]
+    cell_cpal2 <- filter_color(cell_cpal, common_cell)
+
+    cellchat_obj <- process_data(cellchat_input_obj,  celltype_col=celltype_col)
     cellchat_obj[['run_mode']] <- 'multi'
+    cellchat_obj[['cell_cpal']] <- cell_cpal
+    cellchat_obj[['group_cpal']] <- group_cpal
     
     if (group_sort != 'None') {
       group_sort <- str_split(group_sort, ',')[[1]]
@@ -698,6 +729,8 @@ if (compare_method == 'multi') {
     }
   }else {
     cellchat_obj <- readRDS(str_glue("{cellchat_rds_dir}/multi.rds"))
+    cell_cpal2 <- cellchat_obj[['cell_cpal']] 
+    group_cpal <- cellchat_obj[['group_cpal']]
     print("LOAD : CELLCHAT RDS FINISH! - multi")
   }
   
@@ -705,9 +738,9 @@ if (compare_method == 'multi') {
   
   show.compareInteractions(cellchat_obj, outdir.comp, treatment = 'None', control= 'None', celltype_col = celltype_col, only_bar = TRUE,group_cpal = group_cpal)
   show.ranknet(cellchat_obj, str_glue("{outdir.comp}"), group_cpal = group_cpal)
-  show.eachsample_interaction(cellchat_obj, str_glue("{outdir.comp}"), celltype_col = celltype_col, cell_cpal = cell_cpal)
-  show.pathway(cellchat_obj, str_glue("{outdir.comp}"),celltype_col = celltype_col, group_col = group_col,cell_cpal = cell_cpal)
-  show.netanalysis(cellchat_obj,str_glue("{outdir.comp}"), cell_cpal = cell_cpal)
+  show.eachsample_interaction(cellchat_obj, str_glue("{outdir.comp}"), celltype_col = celltype_col, cell_cpal = cell_cpal2)
+  show.pathway(cellchat_obj, str_glue("{outdir.comp}"),celltype_col = celltype_col, group_col = group_col,cell_cpal = cell_cpal2)
+  show.netanalysis(cellchat_obj,str_glue("{outdir.comp}"), cell_cpal = cell_cpal2)
   
 }
 print('Finish!')
