@@ -44,7 +44,7 @@ mk.outdir <- function(dir) {
 mk_input <- function(seurat.rds.path, group_col, celltype_col, control, treatment) {
   
   obj <- readRDS(seurat.rds.path)
-  
+  Idents(obj) <- obj@meta.data[[celltype_col]]
   if (control != 'None' & treatment != 'None') {
     cells <- rownames(obj@meta.data[obj@meta.data[[group_col]] %in% c(control, treatment), ])
     obj <- subset(obj, cells = cells)
@@ -70,8 +70,12 @@ mk_input <- function(seurat.rds.path, group_col, celltype_col, control, treatmen
     
     # 找到符合共有细胞类型的细胞
     cells_to_keep <- cell_ids[seurat_obj@meta.data[[celltype_col]] %in% common_celltypes]
-    
-    subset(seurat_obj, cells = cells_to_keep)
+    seurat_obj <- subset(seurat_obj, cells = cells_to_keep)
+
+    # 修正因子信息
+
+    seurat_obj@meta.data[[celltype_col]] <- droplevels(seurat_obj@meta.data[[celltype_col]], exclude = setdiff(levels(seurat_obj@meta.data[[celltype_col]]), unique(seurat_obj@meta.data[[celltype_col]])))
+    seurat_obj
   })
   
   # 输出细胞数统计信息
