@@ -1,10 +1,8 @@
-#!/public/home/zhliu/PIPLINE/singlecell/conda_env/sc_start/bin/python
-
 import glob
 import os
 import click
 import subprocess
-from utils.add_log import add_log
+from .utils.add_log import add_log
 import json
 from rich.console import Console
 from rich.markdown import Markdown
@@ -12,8 +10,9 @@ from rich.console import Console
 from rich.table import Table
 from rich import print as rprint
 
+import scwf
 
-ROOT_DIR = os.path.dirname(__file__)
+ROOT_DIR = os.path.dirname(scwf.__file__)
 
 def find_analysis_method(name):
     sc_dir = ROOT_DIR
