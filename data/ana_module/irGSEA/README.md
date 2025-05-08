@@ -25,6 +25,12 @@
 
 2. 软件自带数据库human和mouse，直接传入`--geneset`即可，例如 `--geneset clusterprofile_db/GO_BP` 
 
+- 方式：
+
+  `--geneset human/clusterprofile_db/GO_BP`
+
+  `--geneset mouse/clusterprofile_db/GO_BP`
+
 human
 
 - clusterprofile_db/GO_ALL
