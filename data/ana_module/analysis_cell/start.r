@@ -23,7 +23,6 @@ dirnameScript <- function(){
 
 source(str_glue("{dirnameScript()}/COLORS/load_color.r"))
 
-
 save_gg <- function(p, filename, width, height, format = c('pdf', 'png')) {
     for (d in format) {
         ggsave(filename = str_glue("{filename}.{d}"), plot = p, width = width, height = height, device = d)
@@ -46,7 +45,7 @@ mk.outdir <- function(dir) {
     return(dir)
 }
 
-show.scatter <- function(rds, group_col, celltype_col, outdir, reduction_name = 'umap') {
+show.scatter <- function(rds, group_col, celltype_col, outdir, reduction_name = 'umap', gcpal = 'npg', ccpal = 'Paired') {
     out.p <- mk.outdir(str_glue("{outdir}/{reduction_name}_plot/"))
 
     p.celltype.out <- str_glue("{out.p}/celltype_{reduction_name}") 
@@ -57,9 +56,19 @@ show.scatter <- function(rds, group_col, celltype_col, outdir, reduction_name = 
     p.group.split.out <- str_glue("{out.p}/celltype_{reduction_name}_split")
     p.group.split.out2 <- str_glue("{out.p}/group_{reduction_name}_split")
 
+
+    vec_cell <- rds@meta.data[[celltype_col]] %>% unique
+    vec_gr <- rds@meta.data[[group_col]] %>% unique
+
+    cell_cpal <- get_color(vec_cell, length(vec_cell), palette = ccpal)
+    group_cpal <- get_color(vec_gr, length(vec_gr), palette = gcpal)
+
+
+
     p.celltype.1 <- CellDimPlot(
         rds, 
         group.by = celltype_col, 
+        palcolor = cell_cpal,
         label = T, 
         reduction = reduction_name, 
         theme_use = ggplot2::theme_classic, 
@@ -68,6 +77,7 @@ show.scatter <- function(rds, group_col, celltype_col, outdir, reduction_name = 
     p.celltype.1.nolegend <- CellDimPlot(
         rds, 
         group.by = celltype_col, 
+        palcolor = cell_cpal,
         label = T, 
         reduction = reduction_name, 
         theme_use = ggplot2::theme_classic, 
@@ -76,18 +86,21 @@ show.scatter <- function(rds, group_col, celltype_col, outdir, reduction_name = 
     p.celltype.2 <- CellDimPlot(
         rds, 
         group.by = celltype_col, 
+        palcolor = cell_cpal,
         reduction =reduction_name,
         label = TRUE, label_insitu = TRUE, label_repel = TRUE, label_segment_color = "red") + guides(color = guide_legend(ncol = 1))
     
     p.celltype.3 <- CellDimPlot(
         rds, 
         group.by = celltype_col, 
+        palcolor = cell_cpal,
         reduction =reduction_name,
         label = TRUE, label_insitu = TRUE, label_repel = TRUE, label_segment_color = "red", legend.position = "none")
 
     p.group <- CellDimPlot(
         rds, 
         group.by = group_col, 
+        palcolor = group_cpal,
         reduction = reduction_name, 
         theme_use = ggplot2::theme_classic, 
         theme_args = list(base_size = 10),
@@ -99,17 +112,18 @@ show.scatter <- function(rds, group_col, celltype_col, outdir, reduction_name = 
         rds, 
         group.by = celltype_col, 
         reduction = reduction_name, 
+        palcolor = cell_cpal,
         theme_use = ggplot2::theme_classic, 
         theme_args = list(base_size = 10), legend.position = "none", split.by = group_col)
     
     p.group.split2 <- CellDimPlot(
         rds, 
         group.by = group_col, 
+        palcolor = group_cpal,
         reduction = reduction_name, 
         theme_use = ggplot2::theme_classic, 
         theme_args = list(base_size = 10),
-        split.by = group_col,legend.position = "none",
-        palette = "npg")
+        split.by = group_col,legend.position = "none")
 
 
 
@@ -231,6 +245,6 @@ if (args$group_sort != 'None') {
 rds<- readRDS(rds.path)
 print("load RDS success")
 
-show.scatter(rds, group_col, cluster_col, outdir, reduction_name)
+show.scatter(rds, group_col, cluster_col, outdir, reduction_name, ccpal = args$ccpal,  gcpal = args$gcpal)
 pct_df <- get.cell.pct(rds, group_col, cluster_col, outdir)
 plot_cellpct(rds, pct_df, group_col, cluster_col, outdir, group_sort = group_sort, ccpal = args$ccpal,  gcpal = args$gcpal)

@@ -17,7 +17,7 @@ def module():
 
 
 @main.command()
-@click.option('--method', type=click.Choice(['oss', 'bypy']), default='oss', help='')
+@click.option('--method', type=click.Choice(['oss', 'bypy']), default='bypy', help='')
 def download_env(method):
     if method == 'oss':
         #cmd1 = f'obsutil cp obs://{Bucket_name}/lib.tar.gz ./'
@@ -46,9 +46,20 @@ def export_env():
     click.echo("环境打包完成：libs.tar.gz")
 
 
+@main.command()
+def export_module():
+    module_dir = os.path.join(ROOT_DIR, 'ana_module')
+    if not os.path.exists(module_dir):
+        click.echo(f"module_dir 目录不存在: {module_dir}")
+        return
+
+    tar_cmd = f'tar -zcvf ./modules.tar.gz -C {ROOT_DIR} ana_module'
+    subprocess.check_call(tar_cmd, shell=True)
+    click.echo("分析模块打包完成：modules.tar.gz")
+
 
 @main.command()
-@click.option('--method', type=click.Choice(['oss', 'bypy']), default='oss', help='')
+@click.option('--method', type=click.Choice(['oss', 'bypy']), default='bypy', help='')
 def upload_env(method):
     if not os.path.exists('./libs.tar.gz'):
         click.echo("libs.tar.gz 文件不存在，请先运行 export_env 命令")
