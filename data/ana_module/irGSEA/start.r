@@ -27,8 +27,8 @@ parser$add_argument("--geneset", type = "character", help = "Path to geneset .rd
 parser$add_argument("--compare_str", type = "character", help = "Comparison string (e.g., casevscontrol)")
 parser$add_argument("--methods", type = "character", default = "AUCell,UCell,singscore,ssgsea", help = "Methods to use")
 parser$add_argument("--compare_method", type = "character", default = "within,between", help = "Comparison method")
-parser$add_argument("--minGSSize", type = "integer", default = 1, help = "Minimum gene set size")
-parser$add_argument("--maxGSSize", type = "integer", default = 9999, help = "Maximum gene set size")
+parser$add_argument("--minGSSize",  default = '1', help = "Minimum gene set size")
+parser$add_argument("--maxGSSize", default = '9999', help = "Maximum gene set size")
 
 # compare.r 专用参数
 parser$add_argument("--group_sort", type = "character", default = NULL, help = "Group sort order (e.g., control,case)")
@@ -48,18 +48,9 @@ steps <- str_split(args$step, ",")[[1]]
 # Step 1: Run score.r
 if ('score' %in% steps) {
   cat("Running score.r ...\n")
-  score_cmd <- str_glue("Rscript {score_script} ",
-                        "--rds \"{args$rds}\" ",
-                        "--group_col {args$group_col} ",
-                        "--celltype_col {args$celltype_col} ",
-                        "--outdir \"{args$outdir}\" ",
-                        "--target_cell \"{args$target_cell}\" ",
-                        "--geneset \"{args$geneset}\" ",
-                        "--compare_str \"{args$compare_str}\" ",
-                        "--methods \"{args$methods}\" ",
-                        "--compare_method \"{args$compare_method}\" ",
-                        "--minGSSize {args$minGSSize} ",
-                        "--maxGSSize {args$maxGSSize}")
+  print('sssss')
+  score_cmd <- str_glue('Rscript {score_script} --rds {args$rds} --group_col {args$group_col} --celltype_col {args$celltype_col} --outdir {args$outdir} --target_cell {args$target_cell} --geneset {args$geneset} --compare_str {args$compare_str} --methods {args$methods} --compare_method {args$compare_method} --minGSSize {args$minGSSize} --maxGSSize {args$maxGSSize}')
+
   system(score_cmd)
 }
 

@@ -1,0 +1,69 @@
+{
+  "/public/home/zhliu/scWorkflow/libs": {
+    "CellChat.sif": {
+      "crc32": 218009310,
+      "md5": "bb85bd4c7q096cf06411e60da32468f6",
+      "mtime": 1746516267,
+      "size": 2160988160,
+      "slice_md5": "36c0cc41b62886fc023c15aae4ce096d"
+    },
+    "DoRothEA.sif": {
+      "md5": "163e2043cvc33daf0a2b69adbb5ebe85",
+      "mtime": 1740018712,
+      "size": 1847451648
+    },
+    "Monocle3.sif": {
+      "md5": "ab1fbd0b9h6e240f913a59f04c123d11",
+      "mtime": 1745566688,
+      "size": 1971744768
+    },
+    "_common.sif": {
+      "md5": "c89422a92h7573ddc1d76bfaa2552039",
+      "mtime": 1746497514,
+      "size": 1860333568
+    },
+    "cytotrace2.sif": {
+      "md5": "5de36c7b9v623f99391ee00bdc1029cd",
+      "mtime": 1745982080,
+      "size": 1783488512
+    },
+    "inferCNV.sif": {
+      "md5": "c02ffa211sd5336fad8b871a16b4d2bb",
+      "mtime": 1739264573,
+      "size": 1744805888
+    },
+    "scDist.sif": {
+      "md5": "e080ebddcv81c333f52279c31211ac3c",
+      "mtime": 1736230799,
+      "size": 1742536704
+    },
+    "scRoe.sif": {
+      "md5": "d95255a13h3350776c6e954ba3505f9b",
+      "mtime": 1741846979,
+      "size": 1877426176
+    },
+    "slingshot.sif": {
+      "md5": "4efa0a018s4b1295748e8dc530948628",
+      "mtime": 1746496716,
+      "size": 1949618176
+    }
+  },
+  "/public/home/zhliu/singlecell/project/neibu/02.20250507": {
+    "libs.tar.gz": {
+      "crc32": 2276937084,
+      "md5": "e6c3e4a83t4ae0e03729607f60423f48",
+      "mtime": 1746610740,
+      "size": 21016638260,
+      "slice_md5": "5921b08c80187907fb3fd8aed2a95aa8"
+    }
+  },
+  "/public/home/zhliu/soft": {
+    "libs.tar.gz": {
+      "crc32": 3494671384,
+      "md5": "1ea40c0cbja5328f0df828a339fac0fa",
+      "mtime": 1746585543,
+      "size": 16344866906,
+      "slice_md5": "a00b23cd33d43ffac956de62e969b17e"
+    }
+  }
+}

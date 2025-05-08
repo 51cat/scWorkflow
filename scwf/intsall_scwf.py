@@ -4,7 +4,6 @@ import os
 import subprocess
 
 ROOT_DIR = os.path.dirname(scwf.__file__)
-Bucket_name = 'yikebucket'
 
 @click.group()
 def main():
@@ -15,23 +14,32 @@ def module():
     cmd = f'cp -a ./data/ana_module/ {ROOT_DIR}/'
     subprocess.check_call(cmd, shell=True)
 
+@main.command()
+def mk_config():
+    cmd = f'cp -a ./data/configs/ {ROOT_DIR}/'
+    subprocess.check_call(cmd, shell=True)
+
+
+@main.command()
+@click.option('--env_p', default='./libs/', help='')
+def env(env_p):
+    cmd = f'cp -a {env_p} {ROOT_DIR}/'
+    subprocess.check_call(cmd, shell=True)
+
 
 @main.command()
 @click.option('--method', type=click.Choice(['oss', 'bypy']), default='bypy', help='')
 def download_env(method):
     if method == 'oss':
-        #cmd1 = f'obsutil cp obs://{Bucket_name}/lib.tar.gz ./'
-        cmd2 = f'tar -zxvf ./libs.tar.gz'
-        cmd3 = f'cp -a ./libs {ROOT_DIR}/'
-        cmd4 = f'rm -rf ./lib/ ./libs.tar.gz'
-
-        #subprocess.check_call(cmd1, shell=True)
-        subprocess.check_call(cmd2, shell=True)
-        subprocess.check_call(cmd3, shell=True)
-        subprocess.check_call(cmd4, shell=True)
+        print('remove!')
 
     elif method == 'bypy':
-        click.echo("bypy 下载方式尚未实现")
+        config_dir = f"{ROOT_DIR}/configs/.bypy"
+        cmd1 = f"bypy --config-dir {config_dir} downfile libs.tar.gz"
+        subprocess.check_call(cmd1, shell=True)
+
+        cmd2 = f'tar -zxvf libs.tar.gz'
+        subprocess.check_call(cmd2, shell=True)
 
 
 @main.command()
@@ -61,14 +69,22 @@ def export_module():
 @main.command()
 @click.option('--method', type=click.Choice(['oss', 'bypy']), default='bypy', help='')
 def upload_env(method):
-    if not os.path.exists('./libs.tar.gz'):
-        click.echo("libs.tar.gz 文件不存在，请先运行 export_env 命令")
-        return
-
-    if method == 'obss':
-        cmd = f'obsutil cp ./libs.tar.gz obs://{Bucket_name}/'
-        subprocess.check_call(cmd, shell=True)
-        click.echo("环境上传完成：libs.tar.gz 上传到 OBS")
+    if method == 'oss':
+        print('remove!')
 
     elif method == 'bypy':
-        click.echo("bypy 上传方式尚未实现")
+        config_dir = f"{ROOT_DIR}/configs/.bypy"
+        cmd1 = f"bypy --config-dir {config_dir} upload libs.tar.gz"
+        subprocess.check_call(cmd1, shell=True)
+
+
+@main.command()
+@click.option('--method', type=click.Choice(['oss', 'bypy']), default='bypy', help='')
+def upload_module(method):
+    if method == 'oss':
+        print('remove!')
+
+    elif method == 'bypy':
+        config_dir = f"{ROOT_DIR}/configs/.bypy"
+        cmd1 = f"bypy --config-dir {config_dir} upload modules.tar.gz"
+        subprocess.check_call(cmd1, shell=True)
