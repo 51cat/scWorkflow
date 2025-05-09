@@ -4,6 +4,24 @@ library(ggplot2)
 library(tidyverse)
 library(argparse)
 
+dirnameScript <- function(){
+    # get full directory path of current script located
+    cmd = commandArgs(trailingOnly = FALSE)
+    scriptName = sub('--file=', "", cmd[grep('^--file=', cmd)])
+    if (length(scriptName) > 0) {
+        path = normalizePath(scriptName)
+        dirname = dirname(path)
+    } else {
+        print('Warning: not a runtime environment, using current directory instead.')
+        dirname = getwd()
+    }
+    return(dirname)
+}
+
+source(str_glue("{dirnameScript()}/COLORS/load_color.r"))
+
+
+
 fetch.seurat <- function(rds, group_col, target) {
   cell.use <- rownames(rds@meta.data[rds@meta.data[[group_col]] %in% target,])
   rds@meta.data[[group_col]] <- as.character(rds@meta.data[[group_col]])
@@ -77,13 +95,23 @@ plot_gene_group_1 <- function(rds, genes, outdir, celltype_col, group_col, cellt
     rds <- fetch.seurat(rds, group_col, group_use)
   }
   
-  ncell <- rds@meta.data[[celltype_col]] %>% unique %>% length
-  ngroup <- rds@meta.data[[group_col]] %>% unique %>% length
+  all.cell <- rds@meta.data[[celltype_col]] %>% unique
+  all.group <- rds@meta.data[[group_col]] %>% unique
+
+  cpal <- get_color(all.cell, length(all.cell), palette = cpal)
+  gcpal <- get_color(all.group, length(all.group), palette = gcpal)
+
+  
+  ncell <- all.cell %>% length
+  ngroup <-  all.group %>% length
+
+  
+
   ngene <- length(genes)
   ht8 <- GroupHeatmap(rds,exp_method = exp_method, slot = slot,
                       features = genes, group.by = celltype_col, split.by = group_col, 
                       cluster_rows = FALSE, cluster_columns = FALSE, cluster_row_slices = FALSE, cluster_column_slices = FALSE,
-                      add_dot = TRUE, add_reticle = TRUE, heatmap_palette = "viridis",cell_split_palette = gcpal,group_palette = cpal,
+                      add_dot = TRUE, add_reticle = TRUE, heatmap_palette = "viridis",cell_split_palcolor = gcpal,group_palcolor = cpal,
                       nlabel = 0, show_row_names = TRUE,show_column_names=F,
                       ht_params = list(row_gap = unit(0, "mm"), row_names_gp = gpar(fontsize = 10))) 
   
@@ -113,7 +141,7 @@ plot_gene_group_1 <- function(rds, genes, outdir, celltype_col, group_col, cellt
                       group.by = celltype_col,
                       exp_method = exp_method, slot = slot,
                       split.by = group_col,
-                      show_row_names = TRUE,show_column_names=FALSE, cell_split_palette = gcpal, group_palette = cpal,
+                      show_row_names = TRUE,show_column_names=FALSE, cell_split_palcolor  = gcpal, group_palcolor  = cpal,
   )
   save_gg(ht1$plot, out.heatmap , w, h*1.15)
   
@@ -126,7 +154,7 @@ plot_gene_group_1 <- function(rds, genes, outdir, celltype_col, group_col, cellt
       for (gene in genes) {
         out.vio <- str_glue("{outdir}/{gene}_vio_exp")
         p <- FeatureStatPlot(
-          rds.use , stat.by = gene, group.by = group_col, add_box = TRUE, stack = TRUE,add_trend = TRUE, palette = gcpal,
+          rds.use , stat.by = gene, group.by = group_col, add_box = TRUE, stack = TRUE,add_trend = TRUE, palcolor = gcpal,
           comparisons = parse_comparisons(compare_str))
         save_gg(p, str_glue('{out.vio}_{cell}'), w, 5)
       }

@@ -3,13 +3,16 @@ import os
 import click
 import subprocess
 from .utils.add_log import add_log
+from .exec import CommandExecutor
 import json
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.console import Console
 from rich.table import Table
 from rich import print as rprint
-
+from collections import deque
+import re
+from scwf import TASK_RECORD
 import scwf
 
 ROOT_DIR = os.path.dirname(scwf.__file__)
@@ -31,6 +34,20 @@ def json_to_dict(js):
     with open(js, 'r', encoding='utf-8') as file:
             parsed_dict = json.load(file)
     return parsed_dict
+
+def parse_job_STATE(text):
+    text = text.strip()
+    out_lines = text.split("\n")
+
+    # 移除 ANSI 转义码（如果有）
+    ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
+    out_lines = [ansi_escape.sub('', line).strip() for line in out_lines if line.strip()]
+
+    if len(out_lines) > 2:
+        state = out_lines[2]
+        return state
+    else:
+        return f"None" 
 
 
 class ModuleRunner:
@@ -95,17 +112,8 @@ class ModuleRunner:
         else:
             self.cmd = ' '.join([self.runner_env, self.start_sc, self.args_str])
     
-    @add_log
-    def run_cmd(self):
-        self.cmd += " &> ./__run.log__ "
-        self.run_cmd.logger.info(f'RUN CMD: {self.cmd}')
-        try:
-            subprocess.check_call(self.cmd, shell=True)
-        except subprocess.CalledProcessError:
-            with open("./__run.log__") as fd:
-                self.run_cmd.logger.error(f"RUN: Fail!")
-                rprint(fd.read())
-                exit()
+    def get_cmd(self):
+        return self.cmd
 
             
 
@@ -139,6 +147,36 @@ def help(module):
     r = ModuleRunner(module)
     r.get_module_file()
     r.show_readme()
+
+
+@cli.command()
+@click.option('--ntask','-n', default=30, required=False)
+def task_stat(ntask):
+
+    if not os.path.exists(TASK_RECORD):
+        rprint('no task stat!')
+    else:
+        with open(TASK_RECORD) as fd:
+            console = Console()
+            table = Table(show_header=True, header_style="bold magenta")
+            table.add_column("date", style="dim")
+            table.add_column("task_name", style="dim")
+            table.add_column("stat")
+            table.add_column("work_dir")
+
+            last_lines = deque(fd, maxlen=ntask)
+
+            for line in last_lines:
+                line = line.strip('\n')
+                time, jobid, jobname, wd = line.split('\t')
+                command = f"sacct -o State -j {jobid} "
+                result = subprocess.run(command, shell=True, capture_output=True, text=True)
+                job_status = parse_job_STATE(result.stdout)
+                table.add_row(time, jobname,job_status,  wd)
+        console.print(table)
+
+
+
 
 
 
@@ -200,11 +238,17 @@ def install_pipline(module_path, env_path):
 @click.option('--exec', default='auto')
 @click.option('--sc', default='auto')
 @click.option('--no_env', default='False')
+@click.option('--verbose', default='True')
+@click.option('--exec_method', default='bash')
+@click.option('--cpu', default='4')
+@click.option('--mem', default='60G')
+@click.option('--wn', default=None)
 @click.argument('args', nargs=-1, type=click.UNPROCESSED)
-def run(module, env, exec,sc, args, no_env):
+def run(module, env, exec,sc, args, no_env, verbose, exec_method, cpu, mem, wn):
     run.logger.info(f"RUN Module Name: {module}")
     run.logger.info(f"RUN env: {env}")
     run.logger.info(f"RUN exec: {exec}")
+    run.logger.info(f"RUN exec_method: {exec_method}")
     run.logger.info(f"RUN script: {sc}")
     
     
@@ -245,7 +289,12 @@ def run(module, env, exec,sc, args, no_env):
     else:
         r.mk_run_cmd()
     
-    r.run_cmd()
+    ce = CommandExecutor(
+        r.get_cmd(), 
+        module,
+        verbose = verbose)
+    ce.exec(method = exec_method, p = cpu, mem = mem, work_name = wn)
+
 
 
 if __name__ == '__main__':

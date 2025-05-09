@@ -250,6 +250,8 @@ plot.all.TF <- function(rds, group_col, cluster_col, outdir) {
 compare.all.TF.single <- function(seurat_obj, group_col, cluster_col, outdir, compare_str, group_cpal ='npg') {
     # box + violin by SCP
     DefaultAssay(object = seurat_obj) <- "tfsulm"
+    vec_gr <- seurat_obj@meta.data[[group_col]] %>% unique
+    group_cpal <- get_color(vec_gr, length(vec_gr), palette = group_cpal)
 
     total_TF <- nrow(seurat_obj)
     print(str_glue("Total TF: {total_TF}"))
@@ -266,8 +268,11 @@ compare.all.TF.single <- function(seurat_obj, group_col, cluster_col, outdir, co
         gene_sums <- Matrix::rowSums( rds.sub@assays$tfsulm@counts)
         target_TF_plot <- names(gene_sums[gene_sums > 0])
 
+        
+        
+
         for (TF in target_TF_plot) {
-            p <- FeatureStatPlot(rds.sub, stat.by = TF, group.by = group_col, add_box = TRUE, stack = TRUE,add_trend = TRUE, comparisons = parse_comparisons(compare_str),  palette = group_cpal)
+            p <- FeatureStatPlot(rds.sub, stat.by = TF, group.by = group_col, add_box = TRUE, stack = TRUE,add_trend = TRUE, comparisons = parse_comparisons(compare_str),  palcolor = group_cpal)
             save_gg(p, str_glue("{out.p}/{cell.use}_{TF}_compare"), 4, 4)
         }
     }

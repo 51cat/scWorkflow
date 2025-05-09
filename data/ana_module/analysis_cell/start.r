@@ -66,7 +66,7 @@ show.scatter <- function(rds, group_col, celltype_col, outdir, reduction_name = 
 
 
     p.celltype.1 <- CellDimPlot(
-        rds, 
+        rds, raster = FALSE,
         group.by = celltype_col, 
         palcolor = cell_cpal,
         label = T, 
@@ -75,7 +75,7 @@ show.scatter <- function(rds, group_col, celltype_col, outdir, reduction_name = 
         theme_args = list(base_size = 10) )+ guides(color = guide_legend(ncol = 1))
     
     p.celltype.1.nolegend <- CellDimPlot(
-        rds, 
+        rds, raster = FALSE,
         group.by = celltype_col, 
         palcolor = cell_cpal,
         label = T, 
@@ -84,32 +84,31 @@ show.scatter <- function(rds, group_col, celltype_col, outdir, reduction_name = 
         theme_args = list(base_size = 10),legend.position = "none" )
 
     p.celltype.2 <- CellDimPlot(
-        rds, 
+        rds, raster = FALSE,
         group.by = celltype_col, 
         palcolor = cell_cpal,
         reduction =reduction_name,
         label = TRUE, label_insitu = TRUE, label_repel = TRUE, label_segment_color = "red") + guides(color = guide_legend(ncol = 1))
     
     p.celltype.3 <- CellDimPlot(
-        rds, 
+        rds, raster = FALSE,
         group.by = celltype_col, 
         palcolor = cell_cpal,
         reduction =reduction_name,
         label = TRUE, label_insitu = TRUE, label_repel = TRUE, label_segment_color = "red", legend.position = "none")
 
     p.group <- CellDimPlot(
-        rds, 
+        rds, raster = FALSE,
         group.by = group_col, 
         palcolor = group_cpal,
         reduction = reduction_name, 
         theme_use = ggplot2::theme_classic, 
-        theme_args = list(base_size = 10),
-        palette = "npg")
+        theme_args = list(base_size = 10))
 
     ngroup <- rds@meta.data[[group_col]] %>% unique %>% length
     
     p.group.split <- CellDimPlot(
-        rds, 
+        rds, raster = FALSE,
         group.by = celltype_col, 
         reduction = reduction_name, 
         palcolor = cell_cpal,
@@ -117,7 +116,7 @@ show.scatter <- function(rds, group_col, celltype_col, outdir, reduction_name = 
         theme_args = list(base_size = 10), legend.position = "none", split.by = group_col)
     
     p.group.split2 <- CellDimPlot(
-        rds, 
+        rds, raster = FALSE,
         group.by = group_col, 
         palcolor = group_cpal,
         reduction = reduction_name, 
@@ -134,8 +133,8 @@ show.scatter <- function(rds, group_col, celltype_col, outdir, reduction_name = 
     save_gg(p.celltype.3, p.celltype.out3, 7, 7.5)
     save_gg(p.group, p.group.out, 7, 7.5)
 
-    save_gg(p.group.split, p.group.split.out, min(30, 5*ngroup), 5)
-    save_gg(p.group.split2, p.group.split.out2, min(30, 5*ngroup), 5)
+    save_gg(p.group.split, p.group.split.out, min(30, 3.5*ngroup), 4)
+    save_gg(p.group.split2, p.group.split.out2, min(30, 3.5*ngroup), 5)
 
 }
 
@@ -222,6 +221,7 @@ parser$add_argument("--reduction_name", type = "character", required = FALSE, he
 
 parser$add_argument("--group_col", type = "character", required = TRUE, help = "")
 parser$add_argument("--celltype_col", type = "character", required = TRUE, help = "")
+parser$add_argument("--show", type = "character", required = FALSE, help = "", default = 'scatter,bar')
 
 
 parser$add_argument("--gcpal", type = "character", required = FALSE, help = "", default = 'npg')
@@ -245,6 +245,13 @@ if (args$group_sort != 'None') {
 rds<- readRDS(rds.path)
 print("load RDS success")
 
-show.scatter(rds, group_col, cluster_col, outdir, reduction_name, ccpal = args$ccpal,  gcpal = args$gcpal)
-pct_df <- get.cell.pct(rds, group_col, cluster_col, outdir)
-plot_cellpct(rds, pct_df, group_col, cluster_col, outdir, group_sort = group_sort, ccpal = args$ccpal,  gcpal = args$gcpal)
+show.type <- str_split(args$show, ",")[[1]]
+
+if ('scatter' %in% show.type) {
+    show.scatter(rds, group_col, cluster_col, outdir, reduction_name, ccpal = args$ccpal,  gcpal = args$gcpal)
+}
+
+if ('bar' %in% show.type) {
+    pct_df <- get.cell.pct(rds, group_col, cluster_col, outdir)
+    plot_cellpct(rds, pct_df, group_col, cluster_col, outdir, group_sort = group_sort, ccpal = args$ccpal,  gcpal = args$gcpal)
+}
