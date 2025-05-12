@@ -10,7 +10,7 @@ def main():
     pass
 
 @main.command()
-def module():
+def install_module():
     cmd = f'cp -a ./data/ana_module/ {ROOT_DIR}/'
     subprocess.check_call(cmd, shell=True)
 
@@ -22,7 +22,7 @@ def mk_config():
 
 @main.command()
 @click.option('--env_p', default='./libs/', help='')
-def env(env_p):
+def install_env(env_p):
     cmd = f'cp -a {env_p} {ROOT_DIR}/'
     subprocess.check_call(cmd, shell=True)
 

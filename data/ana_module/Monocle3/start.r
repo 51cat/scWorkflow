@@ -788,7 +788,7 @@ if (file.exists(file.track)) {
   Track_genes <- read_csv(file.track) %>% pull(id) %>% unique()
   ncell <- colData(cds)[[cluster_col]] %>% unique() %>% length()
   
-  res <- genes_pse_analysis2(cds, Track_genes_top, ncell)
+  res <- genes_pse_analysis2(cds, Track_genes, ncell)
   
   pdf(str_glue('{out.p}/target_gene_pse_exp.pdf'),height = 9, width = 6,onefile = F)
   print(res[['p']])

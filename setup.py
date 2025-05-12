@@ -13,7 +13,7 @@ setup(
     entry_points="""
         [console_scripts]
         scwf=scwf.sc_pip:cli
-        scwf_intsall=scwf.intsall_scwf:main
+        scwf_tk=scwf.scwf_tk:main
     """,
     include_package_data=True,
     zip_safe=False

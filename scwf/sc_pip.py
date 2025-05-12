@@ -24,7 +24,7 @@ def find_analysis_method(name):
     else:
         return f"{sc_dir}/ana_module/{name}"
 
-def load_env(env_p, soft = 'singularity', sub_cmd = 'exec --nv'):
+def load_env(env_p, soft = 'singularity', sub_cmd = 'exec -B /public/home:/public/home --nv'):
     if not os.path.exists(env_p):
         raise FileExistsError(f"Not Found {env_p}")
     return ' '.join([soft, sub_cmd, os.path.abspath(env_p)])
