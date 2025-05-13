@@ -29,7 +29,7 @@ class Transfer:
 
         self.fr = fr
         self.to = to
-        self.env = get_env("_common", load = True)
+        self.env = get_env("sc_switcher", load = True)
     
     def to_h5ad(self):
         sc_path = f'{os.path.dirname(__file__)}/transfer.r'

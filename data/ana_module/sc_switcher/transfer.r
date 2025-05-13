@@ -4,10 +4,11 @@ library(tidyverse)
 library(argparse)
 
 
-Sys.setenv(RETICULATE_PYTHON = "/usr/bin/python")
+#Sys.setenv(PYTHONUSERBASE = "/usr/bin/python")
+#Sys.getenv("PYTHONUSERBASE")
 
 library(reticulate)
-print(py_config())
+#print(py_config())
 
 # Seurat to h5ad
 
@@ -21,7 +22,8 @@ get_dir_filename <- function(file_path) {
 
 convert_seurat_to_h5ad_scCustomize <- function(in_rds, outdir, pyexec = 'None', split_col = 'None', keep = 'None', keep_str='None') {  
   rds <- readRDS(in_rds)
-  #reticulate::use_python(pyexec)
+  reticulate::use_python(pyexec)
+  print(py_config())
   #reticulate::py_module_available(module = 'anndata')
   dir.create(outdir, recursive = T)
 

@@ -4,7 +4,7 @@
 | `--outdir`    | 是             | 无              | 结果输出路径                                                 |
 | `--split_col` | 可选参数       | None            | 根据哪列拆分数据，传入此参数会自动拆分产生h5ad               |
 | `--keep`      | 可选参数       | None            | `--split_col`指定的列中保留哪些数据，例如，cell1,cell2,cell3 |
-| `--keep_str`  | 可选参数       | None            | 保留哪些数据的表达式, e.g., `"nFeature_RNA > 200 & percent.mt < 5 & ann == 'use' "` |
+| `--keep_str`  | 可选参数       | None            | （未实现）保留哪些数据的表达式, e.g., `"nFeature_RNA > 200 & percent.mt < 5 & ann == 'use' "` |
 | `--fr`        | 可选参数       | seurat          | 输入数据格式                                                 |
 | `--to`        | 可选参数       | h5ad            | 输出数据格式                                                 |
 | `--pyexec`    | 可选参数       | /usr/bin/python | python解释器路径                                             |
