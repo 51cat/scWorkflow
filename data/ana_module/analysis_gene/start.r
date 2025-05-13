@@ -79,6 +79,8 @@ plot_gene_group_1 <- function(rds, genes, outdir, celltype_col, group_col, cellt
   
   if (!is.null(celltype_use)){
     rds <- fetch.seurat(rds, celltype_col, celltype_use)
+    rds@meta.data[[celltype_col]] <- factor(rds@meta.data[[celltype_col]], levels = celltype_use)
+
     if (length(celltype_use) == 1) {
       exp_method <- 'raw'
       slot <- 'data'
@@ -100,18 +102,19 @@ plot_gene_group_1 <- function(rds, genes, outdir, celltype_col, group_col, cellt
 
   cpal <- get_color(all.cell, length(all.cell), palette = cpal)
   gcpal <- get_color(all.group, length(all.group), palette = gcpal)
-
+  cpal.list <- list(cpal= cpal)
   
   ncell <- all.cell %>% length
   ngroup <-  all.group %>% length
 
+  
   
 
   ngene <- length(genes)
   ht8 <- GroupHeatmap(rds,exp_method = exp_method, slot = slot,
                       features = genes, group.by = celltype_col, split.by = group_col, 
                       cluster_rows = FALSE, cluster_columns = FALSE, cluster_row_slices = FALSE, cluster_column_slices = FALSE,
-                      add_dot = TRUE, add_reticle = TRUE, heatmap_palette = "viridis",cell_split_palcolor = gcpal,group_palcolor = cpal,
+                      add_dot = TRUE, add_reticle = TRUE, heatmap_palette = "viridis",cell_split_palcolor = gcpal, group_palcolor =  cpal.list, #group_palette = "Paired",# group_palcolor = cpal, #,group_palette = "Paired",
                       nlabel = 0, show_row_names = TRUE,show_column_names=F,
                       ht_params = list(row_gap = unit(0, "mm"), row_names_gp = gpar(fontsize = 10))) 
   
@@ -141,8 +144,9 @@ plot_gene_group_1 <- function(rds, genes, outdir, celltype_col, group_col, cellt
                       group.by = celltype_col,
                       exp_method = exp_method, slot = slot,
                       split.by = group_col,
-                      show_row_names = TRUE,show_column_names=FALSE, cell_split_palcolor  = gcpal, group_palcolor  = cpal,
+                      show_row_names = TRUE,show_column_names=FALSE, cell_split_palcolor  = gcpal,group_palcolor =  cpal.list,cell_annotation_palcolor  = cpal,#group_palette = "Paired", ##group_palette = "Paired"# group_palcolor  = cpal,
   )
+  print(cpal)
   save_gg(ht1$plot, out.heatmap , w, h*1.15)
   
   all_cells <- rds@meta.data[[celltype_col]] %>% unique
