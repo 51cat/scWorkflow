@@ -48,7 +48,11 @@ def parse_job_STATE(text):
         return state
     else:
         return f"None" 
-
+    
+def get_file_size_gb(file_path):
+    size_bytes = os.path.getsize(file_path)
+    size_gb = size_bytes / (1024 ** 3)
+    return round(size_gb, 2)
 
 class ModuleRunner:
     def __init__(
@@ -138,6 +142,29 @@ def ls():
         table.add_row(str(inx), fname, f"{ROOT_DIR}/ana_module/{fname}/")
     
     console.print(table)
+
+
+@cli.command(context_settings=dict(ignore_unknown_options=True))
+def lsenv():
+    console = Console()
+    table = Table(show_header=True, header_style="bold magenta")
+    table.title = "Analysis envirnment"
+    table.add_column("序号", style="dim", width=5)
+    table.add_column("env", style="dim", width=20)
+    table.add_column("size(GB)")
+
+    inx = 0
+    total_size = 0
+    env_all = glob.glob(f"{ROOT_DIR}/libs/*.sif")
+    for file in env_all:
+        inx += 1
+        size = get_file_size_gb(file)
+        table.add_row(str(inx), file.split("/")[-1], str(size))
+        total_size += size
+    
+    console.print(table)
+    rprint(f"Total size: {total_size}G")
+    rprint(f"Env dir: {ROOT_DIR}/libs/")
 
 
 

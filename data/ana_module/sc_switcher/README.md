@@ -9,3 +9,4 @@
 | `--to`        | 可选参数       | h5ad            | 输出数据格式                                                 |
 | `--pyexec`    | 可选参数       | /usr/bin/python | python解释器路径                                             |
 
+- 需要增加 `--no_env True`参数
