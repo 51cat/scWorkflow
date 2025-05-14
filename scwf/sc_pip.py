@@ -7,13 +7,14 @@ from .exec import CommandExecutor
 import json
 from rich.console import Console
 from rich.markdown import Markdown
-from rich.console import Console
 from rich.table import Table
 from rich import print as rprint
+from rich.text import Text
 from collections import deque
 import re
 from scwf import TASK_RECORD
 import scwf
+
 
 ROOT_DIR = os.path.dirname(scwf.__file__)
 
@@ -199,6 +200,18 @@ def task_stat(ntask):
                 command = f"sacct -o State -j {jobid} "
                 result = subprocess.run(command, shell=True, capture_output=True, text=True)
                 job_status = parse_job_STATE(result.stdout)
+
+                if job_status == 'COMPLETED':
+                    job_status = Text(job_status, style="#FF69B4")
+                elif job_status == 'RUNNING':
+                    job_status = Text(job_status, style="#1E90FF")
+                elif job_status == 'FAILED':
+                    job_status = Text(job_status, style="#FF4500")
+                elif job_status == 'CANCELLED+':
+                    job_status = Text(job_status, style="#FFD700")
+                else:
+                    job_status = Text(job_status, style="white")
+
                 table.add_row(time, jobname,job_status,  wd)
         console.print(table)
 
