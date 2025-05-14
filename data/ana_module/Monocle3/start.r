@@ -506,6 +506,9 @@ parser$add_argument("--ccpal", help = "", default = 'Paired')
 
 parser$add_argument("--spec", help = "", default = 'human')
 
+parser$add_argument("--k", help = "", default = 'auto')
+parser$add_argument("--k_target_gene", help = "", default = 'auto')
+
 args <- parser$parse_args()
 
 rds_path <- args$rds
