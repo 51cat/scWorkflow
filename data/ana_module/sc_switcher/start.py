@@ -31,7 +31,7 @@ class Transfer:
         self.to = to
         self.env = get_env("sc_switcher", load = True)
     
-    def to_h5ad(self):
+    def tarsfer(self):
         sc_path = f'{os.path.dirname(__file__)}/transfer.r'
 
         cmd = (
@@ -42,12 +42,10 @@ class Transfer:
             f"--split_col {self.split_col} "
             f"--keep {self.keep} "
             f"--keep_str {self.keep_str} "
+            f"--from {self.fr} "
+            f"--to {self.to} "
         )
         subprocess.check_call(cmd, shell=True)
-
-    def run(self):
-        if self.fr == 'seurat' and self.to == 'h5ad':
-            self.to_h5ad()
 
 
 def main():
@@ -77,7 +75,7 @@ def main():
         to = args.to,
     )
 
-    converter.run()
+    converter.tarsfer()
 
 if __name__ == '__main__':
     main()
