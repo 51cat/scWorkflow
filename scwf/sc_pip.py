@@ -14,9 +14,9 @@ from collections import deque
 import re
 from scwf import TASK_RECORD
 import scwf
+from scwf import ROOT_DIR
 
-
-ROOT_DIR = os.path.dirname(scwf.__file__)
+#ROOT_DIR = os.path.dirname(scwf.__file__)
 
 def find_analysis_method(name):
     sc_dir = ROOT_DIR
@@ -186,9 +186,10 @@ def task_stat(ntask):
     else:
         with open(TASK_RECORD) as fd:
             console = Console()
-            table = Table(show_header=True, header_style="bold magenta")
-            table.add_column("date", style="dim")
-            table.add_column("task_name", style="dim")
+            table = Table(show_header=True, header_style="#39C5BB")
+            table.add_column("date")
+            table.add_column("task_name")
+            table.add_column("jobid")
             table.add_column("stat")
             table.add_column("work_dir")
 
@@ -212,19 +213,16 @@ def task_stat(ntask):
                 else:
                     job_status = Text(job_status, style="white")
 
-                table.add_row(time, jobname,job_status,  wd)
+                table.add_row(time, jobname, jobid, job_status,  wd)
         console.print(table)
-
-
-
-
 
 
 @add_log
 @cli.command(context_settings=dict(ignore_unknown_options=True))
 @click.option('--module', help='')
 @click.option('--sc_type', help='')
-def mk_pipline(module, sc_type):
+@click.option('--add_colordb', help='', default = 'False')
+def mk_pipline(module, sc_type, add_colordb):
     os.system(f"mkdir -p ./{module}  && touch ./{module}/README.md && mkdir ./{module}/demo/")
     if sc_type == 'R':
         os.system(f"touch ./{module}/start.r")
@@ -233,6 +231,9 @@ def mk_pipline(module, sc_type):
 
     with open(f'./{module}/info.json', 'w') as file:
             json.dump({"exec":sc_type}, file, indent=4)
+
+    if add_colordb in [True, 'True']:
+        pass
 
 
 
